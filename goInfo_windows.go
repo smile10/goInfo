@@ -1,13 +1,10 @@
 package goInfo
 
 import (
-	"bytes"
 	"fmt"
 	"golang.org/x/sys/windows/registry"
 	"os"
-	"os/exec"
 	"runtime"
-	"strings"
 )
 
 func GetInfo() (GoInfoObject, error) {

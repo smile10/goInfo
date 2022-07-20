@@ -11,7 +11,7 @@ import (
 
 func GetInfo() (GoInfoObject, error) {
 	out, err := _getInfo()
-	for strings.Index(out, "broken pipe") != -1 {
+	for strings.Contains(out, "broken pipe") {
 		out, err = _getInfo()
 		time.Sleep(500 * time.Millisecond)
 	}
