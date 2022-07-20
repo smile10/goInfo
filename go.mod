@@ -1,3 +1,3 @@
-module github.com/matishsiao/goInfo
+module github.com/smile10/goInfo
 
 go 1.16
