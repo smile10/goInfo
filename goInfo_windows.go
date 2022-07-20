@@ -10,7 +10,9 @@ import (
 func GetInfo() (GoInfoObject, error) {
 	k, err := registry.OpenKey(registry.LOCAL_MACHINE, `SOFTWARE\Microsoft\Windows NT\CurrentVersion`, registry.QUERY_VALUE)
 	if err != nil {
-		log.Fatal(err)
+		gio := GoInfoObject{Kernel: "windows", Core: "unknown", Platform: runtime.GOARCH, OS: "windows", GoOS: runtime.GOOS, CPUs: runtime.NumCPU()}
+		gio.Hostname, _ = os.Hostname()
+		return gio, fmt.Errorf("getInfo: %s", err)
 	}
 	defer k.Close()
 
