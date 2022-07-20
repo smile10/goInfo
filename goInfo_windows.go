@@ -32,7 +32,7 @@ func GetInfo() (GoInfoObject, error) {
 	} else {
 		ver = osStr[tmp1+9 : tmp2]
 	}
-	gio := GoInfoObject{Kernel: "windows", Core: ver, Platform: "unknown", OS: "windows", GoOS: runtime.GOOS, CPUs: runtime.NumCPU()}
+	gio := GoInfoObject{Kernel: "windows", Core: ver, Platform: runtime.GOARCH, OS: "windows", GoOS: runtime.GOOS, CPUs: runtime.NumCPU()}
 	gio.Hostname, _ = os.Hostname()
 	return gio, nil
 }
