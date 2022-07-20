@@ -3,6 +3,7 @@ package goInfo
 import (
 	"bytes"
 	"fmt"
+	"golang.org/x/sys/windows/registry"
 	"os"
 	"os/exec"
 	"runtime"
@@ -10,29 +11,27 @@ import (
 )
 
 func GetInfo() (GoInfoObject, error) {
-	cmd := exec.Command("cmd", "ver")
-	cmd.Stdin = strings.NewReader("some input")
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err := cmd.Run()
+	k, err := registry.OpenKey(registry.LOCAL_MACHINE, `SOFTWARE\Microsoft\Windows NT\CurrentVersion`, registry.QUERY_VALUE)
 	if err != nil {
-		gio := GoInfoObject{Kernel: "windows", Core: "unknown", Platform: "unknown", OS: "windows", GoOS: runtime.GOOS, CPUs: runtime.NumCPU()}
+		log.Fatal(err)
+	}
+	defer k.Close()
+
+	pn, _, err := k.GetStringValue("ProductName")
+	if err != nil {
+		gio := GoInfoObject{Kernel: "windows", Core: "unknown", Platform: runtime.GOARCH, OS: "windows", GoOS: runtime.GOOS, CPUs: runtime.NumCPU()}
 		gio.Hostname, _ = os.Hostname()
 		return gio, fmt.Errorf("getInfo: %s", err)
 	}
-	osStr := strings.Replace(out.String(), "\n", "", -1)
-	osStr = strings.Replace(osStr, "\r\n", "", -1)
-	tmp1 := strings.Index(osStr, "[Version")
-	tmp2 := strings.Index(osStr, "]")
-	var ver string
-	if tmp1 == -1 || tmp2 == -1 {
-		ver = "unknown"
-	} else {
-		ver = osStr[tmp1+9 : tmp2]
+
+	cb, _, err := k.GetStringValue("CurrentBuild")
+	if err != nil {
+		gio := GoInfoObject{Kernel: "windows", Core: "unknown", Platform: runtime.GOARCH, OS: "windows", GoOS: runtime.GOOS, CPUs: runtime.NumCPU()}
+		gio.Hostname, _ = os.Hostname()
+		return gio, fmt.Errorf("getInfo: %s", err)
 	}
-	gio := GoInfoObject{Kernel: "windows", Core: ver, Platform: runtime.GOARCH, OS: "windows", GoOS: runtime.GOOS, CPUs: runtime.NumCPU()}
+
+	gio := GoInfoObject{Kernel: "windows", Core: cb, Platform: runtime.GOARCH, OS: pn, GoOS: runtime.GOOS, CPUs: runtime.NumCPU()}
 	gio.Hostname, _ = os.Hostname()
 	return gio, nil
 }
